@@ -9,7 +9,7 @@ import com.nassican.splashcalculatorapp.database.dao.UserDao
 import com.nassican.splashcalculatorapp.database.model.IMCRecord
 import com.nassican.splashcalculatorapp.database.model.User
 
-@Database(entities = [User::class, IMCRecord::class], version = 1, exportSchema = false)
+@Database(entities = [User::class, IMCRecord::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
@@ -25,7 +25,10 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "app_database"
-                ).build()
+                )
+                .fallbackToDestructiveMigration()
+                .build()
+
                 INSTANCE = instance
                 instance
             }

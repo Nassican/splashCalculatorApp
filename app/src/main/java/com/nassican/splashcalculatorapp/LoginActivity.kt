@@ -81,6 +81,7 @@ class LoginActivity : AppCompatActivity() {
             }
             if (user != null) {
                 Toast.makeText(this@LoginActivity, "Login successful", Toast.LENGTH_SHORT).show()
+                intent.putExtra("USER_ID", user.id)
                 startActivity(intent)
                 finish()
             } else {

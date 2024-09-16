@@ -2,6 +2,7 @@ package com.nassican.splashcalculatorapp
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -12,12 +13,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.nassican.splashcalculatorapp.database.AppDatabase
 import com.nassican.splashcalculatorapp.database.model.IMCRecord
 import com.nassican.splashcalculatorapp.ui.IMCCircle
+import com.nassican.splashcalculatorapp.ui.IMCHistoryAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -29,9 +34,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var editTextHeight: EditText
     private lateinit var buttonCalculate: Button
     private lateinit var textViewResult: TextView
+    private lateinit var buttonViewHistory: Button
     private lateinit var colorIndicator: View
     private lateinit var imcIndicator: IMCCircle
     private lateinit var database: AppDatabase
+    private lateinit var recyclerView: RecyclerView
+    private var userId: Int = -1
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,11 +47,27 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
+        userId = intent.getIntExtra("USER_ID", -1)
+        if (userId == -1) {
+            // Manejar el error: No se proporcionó un ID de usuario válido
+            Toast.makeText(this, "Error: No valid user ID", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+
+        recyclerView = findViewById(R.id.imcHistoryRecyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
         database = AppDatabase.getDatabase(this)
 
         initViews()
         setListeners()
         setupBackButton()
+        if (userId != -1) {
+            loadIMCHistory(userId)
+        } else {
+            // Handle error - no user ID provided
+        }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -56,6 +80,7 @@ class MainActivity : AppCompatActivity() {
         editTextWeight = findViewById(R.id.editTextWeight)
         editTextHeight = findViewById(R.id.editTextHeight)
         buttonCalculate = findViewById(R.id.buttonCalculate)
+        buttonViewHistory = findViewById(R.id.buttonViewHistory)
         textViewResult = findViewById(R.id.textViewResult)
         colorIndicator = findViewById(R.id.colorIndicator)
         imcIndicator = findViewById(R.id.bmiGaugeView)
@@ -63,9 +88,23 @@ class MainActivity : AppCompatActivity() {
         colorIndicator.setBackgroundColor(ContextCompat.getColor(this, R.color.unknown))
     }
 
+    private fun loadIMCHistory(userId: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val records = database.imcRecordDao().getRecordsForUser(userId)
+            withContext(Dispatchers.Main) {
+                recyclerView.adapter = IMCHistoryAdapter(records)
+            }
+        }
+    }
+
     private fun setListeners() {
         buttonCalculate.setOnClickListener {
             calculateBMI()
+        }
+        buttonViewHistory.setOnClickListener {
+            val intent = Intent(this, IMCHistoryActivity::class.java)
+            intent.putExtra("USER_ID", userId)
+            startActivity(intent)
         }
     }
 
@@ -100,6 +139,7 @@ class MainActivity : AppCompatActivity() {
             val currentTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
 
             val imcRecord = IMCRecord(
+                userId = userId,
                 weight = weight,
                 height = height,
                 bmi = bmi,
@@ -108,7 +148,17 @@ class MainActivity : AppCompatActivity() {
             )
 
             CoroutineScope(Dispatchers.IO).launch {
-                database.imcRecordDao().insertRecord(imcRecord)
+                try {
+                    database.imcRecordDao().insertRecord(imcRecord)
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@MainActivity, "IMC record saved successfully", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@MainActivity, "Error saving IMC record: ${e.message}", Toast.LENGTH_LONG).show()
+                        Log.e("MainActivity", "Error saving IMC record", e)
+                    }
+                }
             }
 
             val bmiCategories = mapOf(
