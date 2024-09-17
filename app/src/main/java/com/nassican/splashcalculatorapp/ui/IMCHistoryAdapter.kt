@@ -1,5 +1,6 @@
 package com.nassican.splashcalculatorapp.ui
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,7 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.nassican.splashcalculatorapp.R
 import com.nassican.splashcalculatorapp.database.model.IMCRecord
 
-class IMCHistoryAdapter(private val imcRecords: List<IMCRecord>) :
+class IMCHistoryAdapter(
+    private val context: Context,
+    private val imcRecords: MutableList<IMCRecord>
+) :
     RecyclerView.Adapter<IMCHistoryAdapter.IMCViewHolder>() {
 
     class IMCViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -25,10 +29,22 @@ class IMCHistoryAdapter(private val imcRecords: List<IMCRecord>) :
 
     override fun onBindViewHolder(holder: IMCViewHolder, position: Int) {
         val currentItem = imcRecords[position]
+        val weightHeightText = context.getString(
+            R.string.weight_height_text,
+            currentItem.weight,
+            currentItem.height
+        )
+        val bmiText = context.getString(R.string.bmi_text, currentItem.bmi)
         holder.dateTimeTextView.text = "${currentItem.date} ${currentItem.time}"
-        holder.weightHeightTextView.text = "Weight: ${currentItem.weight} kg, Height: ${currentItem.height} m"
-        holder.bmiTextView.text = "BMI: %.2f".format(currentItem.bmi)
+        holder.weightHeightTextView.text = weightHeightText
+        holder.bmiTextView.text = bmiText
     }
 
     override fun getItemCount() = imcRecords.size
+
+    fun updateRecords(newRecords: List<IMCRecord>) {
+        imcRecords.clear()
+        imcRecords.addAll(newRecords)
+        notifyDataSetChanged()
+    }
 }

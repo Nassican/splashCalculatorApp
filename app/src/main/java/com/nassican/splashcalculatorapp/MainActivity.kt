@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.nassican.splashcalculatorapp.database.AppDatabase
+import com.nassican.splashcalculatorapp.database.dao.IMCRecordDao
 import com.nassican.splashcalculatorapp.database.model.IMCRecord
 import com.nassican.splashcalculatorapp.ui.IMCCircle
 import com.nassican.splashcalculatorapp.ui.IMCHistoryAdapter
@@ -34,11 +35,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var editTextHeight: EditText
     private lateinit var buttonCalculate: Button
     private lateinit var textViewResult: TextView
-    private lateinit var buttonViewHistory: Button
     private lateinit var colorIndicator: View
     private lateinit var imcIndicator: IMCCircle
     private lateinit var database: AppDatabase
     private lateinit var recyclerView: RecyclerView
+    private lateinit var imcHistoryAdapter: IMCHistoryAdapter
     private var userId: Int = -1
 
 
@@ -64,7 +65,9 @@ class MainActivity : AppCompatActivity() {
         setListeners()
         setupBackButton()
         if (userId != -1) {
-            loadIMCHistory(userId)
+            setupRecyclerView()
+            loadIMCHistory()
+
         } else {
             // Handle error - no user ID provided
         }
@@ -74,13 +77,18 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        findViewById<Button>(R.id.buttonViewHistory).setOnClickListener {
+            val intent = Intent(this, IMCHistoryActivity::class.java)
+            intent.putExtra("USER_ID", userId)
+            startActivity(intent)
+        }
     }
 
     private fun initViews() {
         editTextWeight = findViewById(R.id.editTextWeight)
         editTextHeight = findViewById(R.id.editTextHeight)
         buttonCalculate = findViewById(R.id.buttonCalculate)
-        buttonViewHistory = findViewById(R.id.buttonViewHistory)
         textViewResult = findViewById(R.id.textViewResult)
         colorIndicator = findViewById(R.id.colorIndicator)
         imcIndicator = findViewById(R.id.bmiGaugeView)
@@ -88,11 +96,17 @@ class MainActivity : AppCompatActivity() {
         colorIndicator.setBackgroundColor(ContextCompat.getColor(this, R.color.unknown))
     }
 
-    private fun loadIMCHistory(userId: Int) {
+    private fun setupRecyclerView() {
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        imcHistoryAdapter = IMCHistoryAdapter(this, mutableListOf())
+        recyclerView.adapter = imcHistoryAdapter
+    }
+
+    private fun loadIMCHistory() {
         CoroutineScope(Dispatchers.IO).launch {
             val records = database.imcRecordDao().getRecordsForUser(userId)
             withContext(Dispatchers.Main) {
-                recyclerView.adapter = IMCHistoryAdapter(records)
+                imcHistoryAdapter.updateRecords(records)
             }
         }
     }
@@ -100,11 +114,6 @@ class MainActivity : AppCompatActivity() {
     private fun setListeners() {
         buttonCalculate.setOnClickListener {
             calculateBMI()
-        }
-        buttonViewHistory.setOnClickListener {
-            val intent = Intent(this, IMCHistoryActivity::class.java)
-            intent.putExtra("USER_ID", userId)
-            startActivity(intent)
         }
     }
 
@@ -148,17 +157,9 @@ class MainActivity : AppCompatActivity() {
             )
 
             CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    database.imcRecordDao().insertRecord(imcRecord)
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@MainActivity, "IMC record saved successfully", Toast.LENGTH_SHORT).show()
-                    }
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@MainActivity, "Error saving IMC record: ${e.message}", Toast.LENGTH_LONG).show()
-                        Log.e("MainActivity", "Error saving IMC record", e)
-                    }
-                }
+                database.imcRecordDao().insertRecord(imcRecord)
+                // Recargar el historial después de insertar el nuevo registro
+                loadIMCHistory()
             }
 
             val bmiCategories = mapOf(

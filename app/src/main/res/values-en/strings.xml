@@ -30,4 +30,15 @@
     <string name="tv_confirm_password">Confirm Password</string>
     <string name="btn_register">SignUp</string>
     <string name="btn_go_register">Don\'t have an account? Sign up</string>
+    <string name="btn_records">Record</string>
+    <string name="text_imcrecords">BMI History</string>
+    <string name="weight_height_text">Weight: %1$.2f kg, Height: %2$.2f m</string>
+    <string name="bmi_text">BMI: %1$.2f</string>
+    <string name="username_form">Username cannot be empty</string>
+    <string name="password_form">Password cannot be empty</string>
+    <string name="password_limit">Password must be at least 6 characters long</string>
+    <string name="register_succesfull">User registered successfully</string>
+    <string name="register_error">Error registering user. Please try again.</string>
+    <string name="about_me">Created by Jesús David Benavides Chicaiza</string>
+    <string name="about_me_title">About me</string>
 </resources>

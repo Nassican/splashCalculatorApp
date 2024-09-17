@@ -62,15 +62,15 @@ class SignUpActivity : AppCompatActivity() {
 
     private fun validateInput(username: String, password: String): Boolean {
         if (username.isEmpty()) {
-            showToast("Username cannot be empty")
+            showToast(getString(R.string.username_form))
             return false
         }
         if (password.isEmpty()) {
-            showToast("Password cannot be empty")
+            showToast(getString(R.string.password_form))
             return false
         }
         if (password.length < 6) {
-            showToast("Password must be at least 6 characters long")
+            showToast(getString(R.string.password_limit))
             return false
         }
         return true
@@ -83,11 +83,10 @@ class SignUpActivity : AppCompatActivity() {
                 withContext(Dispatchers.IO) {
                     database.userDao().insertUser(newUser)
                 }
-                showToast("User registered successfully")
+                showToast(getString(R.string.register_succesfull))
                 finish()
             } catch (e: Exception) {
-                Log.e("SignUpActivity", "Error registering user", e)
-                showToast("Error registering user. Please try again.")
+                showToast(getString(R.string.register_error))
             }
         }
     }

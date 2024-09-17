@@ -25,6 +25,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var editTextUser: EditText
     private lateinit var editTextPassword: EditText
     private lateinit var buttonLogin: Button
+    private lateinit var buttonAboutMe: Button
     private lateinit var tvGoRegister: TextView
 
     private lateinit var database: AppDatabase
@@ -46,10 +47,16 @@ class LoginActivity : AppCompatActivity() {
         editTextUser = findViewById(R.id.et_user)
         editTextPassword = findViewById(R.id.et_password)
         buttonLogin = findViewById(R.id.btn_login)
+        buttonAboutMe = findViewById(R.id.btn_about_me)
 
         buttonLogin.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             initLogin(intent)
+        }
+
+        buttonAboutMe.setOnClickListener {
+            val intent = Intent(this, Aboutme::class.java)
+            startActivity(intent)
         }
 
         tvGoRegister = findViewById(R.id.tv_register)
@@ -73,19 +80,17 @@ class LoginActivity : AppCompatActivity() {
         val username = findViewById<EditText>(R.id.et_user).text.toString()
         val password = findViewById<EditText>(R.id.et_password).text.toString()
 
-        Log.d("LOGIN", "Usuario: $username, password: $password")
-
         CoroutineScope(Dispatchers.Main).launch {
             val user = withContext(Dispatchers.IO) {
                 database.userDao().login(username, password)
             }
             if (user != null) {
-                Toast.makeText(this@LoginActivity, "Login successful", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@LoginActivity, getString(R.string.login_successful), Toast.LENGTH_SHORT).show()
                 intent.putExtra("USER_ID", user.id)
                 startActivity(intent)
                 finish()
             } else {
-                Toast.makeText(this@LoginActivity, "Invalid credentials", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@LoginActivity, getString(R.string.login_failed), Toast.LENGTH_SHORT).show()
             }
         }
     }

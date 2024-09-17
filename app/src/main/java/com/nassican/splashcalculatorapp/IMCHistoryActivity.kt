@@ -1,6 +1,8 @@
 package com.nassican.splashcalculatorapp
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -17,6 +19,7 @@ import kotlinx.coroutines.withContext
 class IMCHistoryActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
+    private lateinit var imcHistoryAdapter: IMCHistoryAdapter
     private lateinit var database: AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,6 +32,8 @@ class IMCHistoryActivity : AppCompatActivity() {
         database = AppDatabase.getDatabase(this)
 
         val userId = intent.getIntExtra("USER_ID", -1)
+        setupRecyclerView()
+        setupBackButton()
         if (userId != -1) {
             loadIMCHistory(userId)
         } else {
@@ -36,12 +41,24 @@ class IMCHistoryActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupRecyclerView() {
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        imcHistoryAdapter = IMCHistoryAdapter(this, mutableListOf())
+        recyclerView.adapter = imcHistoryAdapter
+    }
+
     private fun loadIMCHistory(userId: Int) {
         CoroutineScope(Dispatchers.IO).launch {
             val records = database.imcRecordDao().getRecordsForUser(userId)
             withContext(Dispatchers.Main) {
-                recyclerView.adapter = IMCHistoryAdapter(records)
+                imcHistoryAdapter.updateRecords(records)
             }
+        }
+    }
+
+    private fun setupBackButton() {
+        findViewById<Button>(R.id.btn_back).setOnClickListener {
+            finish()
         }
     }
 }
