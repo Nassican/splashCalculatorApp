@@ -6,7 +6,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
+    android:layout_margin="20dp"
     tools:context=".MainActivity">
 
     <androidx.constraintlayout.widget.Guideline
@@ -28,19 +28,19 @@
         android:id="@+id/imcHistoryRecyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:padding="16dp"
+        android:layout_marginTop="16dp"
+        android:paddingBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/bmiGaugeView"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintTop_toBottomOf="@+id/bmiGaugeView"/>
 
     <Button
         android:id="@+id/buttonViewHistory"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="16dp"
+        android:textStyle="bold"
         android:layout_marginBottom="20dp"
         android:background="@drawable/background"
         android:text="@string/btn_records"
@@ -68,7 +68,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/calculadora_de_imc"
-        android:layout_marginLeft="16dp"
         android:textSize="32sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -92,7 +91,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="16dp"
             android:gravity="center_vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -109,6 +107,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/tv_weight"
+                    android:textStyle="bold"
                     android:textSize="16dp"
                     android:layout_marginBottom="4dp"/>
 
@@ -116,6 +115,7 @@
                     android:id="@+id/editTextWeight"
                     android:layout_width="match_parent"
                     style="@style/EditTextStyle"
+                    android:background="@drawable/edittext_roundend"
                     android:layout_height="wrap_content"
                     android:hint="@string/tv_weight"
                     android:inputType="numberDecimal"
@@ -133,6 +133,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textStyle="bold"
                     android:text="@string/tv_height"
                     android:textSize="16dp"
                     android:layout_marginBottom="4dp"/>
@@ -140,6 +141,7 @@
                 <EditText
                     android:id="@+id/editTextHeight"
                     style="@style/EditTextStyle"
+                    android:background="@drawable/edittext_roundend"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/tv_height"
@@ -154,6 +156,10 @@
             android:id="@+id/buttonCalculate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:background="@drawable/background"
             android:layout_marginTop="24dp"
             android:layout_weight="1"
             android:text="@string/btn_calculate_imc" />
@@ -183,6 +189,7 @@
             android:id="@+id/textViewResult"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textStyle="bold"
             android:text="@string/tv_result"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
